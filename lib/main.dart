@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_cg/all_users.dart';
 import 'package:flutter_cg/models/user_model.dart';
 
 void main() {
@@ -31,13 +32,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String name = 'Default', username = 'Default', email = 'Default';
   UserModel userModel = UserModel(name: "", email: "", userName: "");
-
+  bool loading = false;
   Future<void> getUserByID({String id = '1'}) async {
     try {
+      setState(() {
+        loading = true;
+      });
       var response =
           await Dio().get('https://jsonplaceholder.typicode.com/users/$id');
 //      print(response);
-
+      setState(() {
+        loading = false;
+      });
       if (response.statusCode == 200 &&
           (response.data as Map<String, dynamic>).isNotEmpty) {
         setState(() {
@@ -71,6 +77,15 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            loading == true ? CircularProgressIndicator() : Container(),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                  return AllUsersSCreen();
+                }));
+              },
+              child: Text("All Users"),
+            ),
             Text(
               userModel.name,
               style: TextStyle(fontSize: 30),
@@ -84,8 +99,12 @@ class _MyHomePageState extends State<MyHomePage> {
               "Address Details",
               style: TextStyle(fontSize: 30),
             ),
-            Text('Street: ${userModel.address.street}'),
-            Text('City: ${userModel.address.city}'),
+            userModel.address != null
+                ? Text('Street: ${userModel.address.street}')
+                : Container(),
+            userModel.address != null
+                ? Text('City: ${userModel.address.city}')
+                : Container(),
           ],
         ),
       ),
